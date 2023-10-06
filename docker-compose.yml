@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  dev-db: # name of container
+    image: postgres:16 # version of postgres
+    ports:
+      - 5434:5432 # port that will be exposed
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nest
+  test-db: # name of container
+    image: postgres:16 # version of postgres
+    ports:
+      - 5435:5432 # port that will be exposed
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nest
