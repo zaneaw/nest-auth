@@ -104,6 +104,10 @@ describe('App e2e', () => {
           })
           .expectStatus(400);
       });
+
+      it.todo('verify session cookie');
+      it.todo('logout user');
+      it.todo('login user');
     });
   });
 });
