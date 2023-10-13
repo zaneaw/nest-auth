@@ -16,6 +16,13 @@ async function bootstrap() {
   //     secret: 'my-secret',
   //     resave: false,
   //     saveUninitialized: false,
+  //     cookie: {
+  //       secure: process.env.NODE_ENV === 'production',
+  //       maxAge:
+  //         process.env.NODE_ENV === 'production'
+  //           ? 1000 * 60 * 60 * 24 * 30 // 30 days
+  //           : 1000 * 60 * 5, // 5 minutes
+  //     },
   //   }),
   // );
 
