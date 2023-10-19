@@ -108,6 +108,10 @@ describe('App e2e', () => {
       it.todo('verify session cookie');
       it.todo('logout user');
       it.todo('login user');
+      it.todo(
+        'should invalidate session cookies not on logout and require login again',
+      );
+      it.todo('should login again');
     });
   });
 });

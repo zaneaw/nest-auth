@@ -1,31 +1,22 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
-import { UsersService } from '../users/users.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { SignInDto, SignUpDto } from './dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
     private prisma: PrismaService,
+    private usersService: UsersService,
   ) {}
 
-  async signIn(signInDto: SignInDto) {
-    const user = await this.usersService.findOne(signInDto.username);
+  async validateUser(username: string, password: string): Promise<any> {
+    const user = await this.usersService.findOne(username);
 
-    const passwordsMatch = await argon2.verify(
-      user?.password,
-      signInDto.password,
-    );
+    const passwordsMatch = await argon2.verify(user?.password, password);
 
     if (!passwordsMatch) {
-      throw new UnauthorizedException();
+      return null;
     }
 
     delete user.password;
@@ -33,30 +24,16 @@ export class AuthService {
     return user;
   }
 
-  async signUp(signUpDto: SignUpDto) {
-    const hashedPassword = await argon2.hash(signUpDto.password);
+  async signup(data: { email: string; username: string; password: string }) {
+    const hashedPassword = await argon2.hash(data.password);
 
-    const user = await this.prisma.user
-      .create({
-        data: {
-          email: signUpDto.email,
-          username: signUpDto.username,
-          password: hashedPassword,
-        },
-      })
-      .catch((error) => {
-        if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            throw new BadRequestException('User already exists');
-          }
-        }
-
-        throw error;
-      });
-
-    if (!user) {
-      throw new BadRequestException('Error creating user');
-    }
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        password: hashedPassword,
+      },
+    });
 
     delete user.password;
 
