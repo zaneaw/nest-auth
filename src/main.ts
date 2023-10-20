@@ -24,7 +24,7 @@ async function bootstrap() {
         maxAge:
           process.env.NODE_ENV === 'production'
             ? 1000 * 60 * 60 * 24 * 30 // 30 days for prod
-            : 1000 * 60 * 5, // 5 minutes for dev
+            : 1000 * 60 * 2, // 5 minutes for dev
       },
       // store: new PrismaSessionStore(new PrismaClient(), {
       //   checkPeriod:

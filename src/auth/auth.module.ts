@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { LocalStrategy } from './strategies';
 import { AuthController } from './auth.controller';
 import { SessionSerializer } from './utils/session-serializer';

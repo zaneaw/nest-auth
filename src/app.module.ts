@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PassportModule } from '@nestjs/passport';
+import { SessionGuard } from './auth/guards';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule.register({ session: true }),
   ],
   controllers: [],
-  providers: [PrismaService],
+  providers: [PrismaService, { provide: 'APP_GUARD', useClass: SessionGuard }],
 })
 export class AppModule {}
