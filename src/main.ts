@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
 import * as passport from 'passport';
-// import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-// import { PrismaClient } from '@prisma/client';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { PrismaClient } from '@prisma/client';
 // import { logger } from './common/middleware/logger.middleware';
 
 async function bootstrap() {
@@ -24,14 +24,14 @@ async function bootstrap() {
         maxAge:
           process.env.NODE_ENV === 'production'
             ? 1000 * 60 * 60 * 24 * 30 // 30 days for prod
-            : 1000 * 60 * 2, // 5 minutes for dev
+            : 1000 * 60 * 2, // 2 minutes for dev
       },
-      // store: new PrismaSessionStore(new PrismaClient(), {
-      //   checkPeriod:
-      //     process.env.NODE_ENV === 'production'
-      //       ? 1000 * 60 * 15 // 15 min for prod
-      //       : 1000 * 60, // 1 min for dev
-      // }),
+      store: new PrismaSessionStore(new PrismaClient(), {
+        checkPeriod:
+          process.env.NODE_ENV === 'production'
+            ? 1000 * 60 * 15 // 15 min for prod
+            : 1000 * 60, // 1 min for dev
+      }),
     }),
   );
 

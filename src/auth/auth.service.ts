@@ -4,6 +4,7 @@ import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import * as passport from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -13,9 +14,10 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
+    console.log('Validate User');
     const user = await this.usersService.findOne(username);
 
-    console.log('validateUser user: ', user);
+    // console.log('validateUser user: ', user);
 
     const passwordsMatch = await argon2.verify(user?.password, password);
 
@@ -66,7 +68,8 @@ export class AuthService {
   }): Promise<User | void> {
     let user: User;
 
-    console.log('data: ', data);
+    console.log('Login');
+    // console.log('data: ', data);
 
     if (!data.email && !data.username) {
       throw new BadRequestException('Email or username is required');
@@ -101,6 +104,8 @@ export class AuthService {
         'Username, Email, or Password is incorrect',
       );
     }
+
+    // passport.authenticate('local', (err, user, info) => {});
 
     delete user.password;
 

@@ -10,17 +10,38 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() body) {
-    return this.authService.login(body);
+  async login() {
+    // return this.authService.login(body);
+    return true;
   }
 
-  // create session cookie for user AFTER signup? How to do?
-  // For now, just login after signup
+  // Redirect to login page after signup if successful
   @Public()
   @Post('signup')
   async signup(@Body() body) {
     return this.authService.signup(body);
   }
+
+  // Implement logout route
+  // how to remove session from sessionStore?
+
+  // Implement forgot password route
+
+  // Implement reset password route
+
+  // Implement change password route
+
+  // Implement change email route
+
+  // Implement change username route
+
+  // Implement delete account route
+
+  // Implement verify email route
+
+  // Implement resend verification email route
+
+  // Implement remove all sessions from user route
 
   @Get('test')
   test() {
