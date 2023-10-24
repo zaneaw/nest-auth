@@ -1,8 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as pactum from 'pactum';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module';
+import { setup } from '../src/setup';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -13,17 +14,13 @@ describe('App e2e', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app = setup(moduleRef.createNestApplication());
 
     // start server
     await app.init();
     await app.listen(3333);
 
     prisma = app.get(PrismaService);
-    // await prisma.post.deleteMany();
-    // await prisma.user.deleteMany();
     await prisma.cleanDb();
 
     pactum.request.setBaseUrl('http://localhost:3333');

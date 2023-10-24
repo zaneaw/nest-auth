@@ -4,7 +4,6 @@ import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import * as passport from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -61,14 +60,14 @@ export class AuthService {
     return user;
   }
 
-  async login(data: {
+  async signin(data: {
     password: string;
     email?: string;
     username?: string;
   }): Promise<User | void> {
     let user: User;
 
-    console.log('Login');
+    console.log('Signin');
     // console.log('data: ', data);
 
     if (!data.email && !data.username) {

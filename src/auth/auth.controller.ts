@@ -1,25 +1,34 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './guards';
 import { Public } from '../common/utils/public-routes';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor() {}
 
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login() {
-    // return this.authService.login(body);
+  @Post('signin')
+  async signin() {
     return true;
   }
 
-  // Redirect to login page after signup if successful
   @Public()
+  @UseGuards(LocalAuthGuard)
   @Post('signup')
-  async signup(@Body() body) {
-    return this.authService.signup(body);
+  async signup() {
+    return true;
+  }
+
+  @Post('signout')
+  async signout(@Req() req) {
+    req.session.destroy();
+    return true;
+  }
+
+  @Get('test')
+  test() {
+    return 'test';
   }
 
   // Implement logout route
@@ -42,9 +51,4 @@ export class AuthController {
   // Implement resend verification email route
 
   // Implement remove all sessions from user route
-
-  @Get('test')
-  test() {
-    return 'test';
-  }
 }

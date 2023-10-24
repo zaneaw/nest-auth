@@ -20,6 +20,7 @@ import { SessionGuard } from './auth/guards';
     PassportModule.register({ session: true }),
   ],
   controllers: [],
+  // providers: [PrismaService],
   providers: [PrismaService, { provide: 'APP_GUARD', useClass: SessionGuard }],
 })
 export class AppModule {}

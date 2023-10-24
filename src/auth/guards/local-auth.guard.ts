@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/utils/public-routes';
+import { AuthService } from '../auth.service';
 
 /**
  * This guard is used to protect the /auth/login route.
@@ -16,13 +17,23 @@ import { IS_PUBLIC_KEY } from '../../common/utils/public-routes';
  */
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {
+  constructor(private authService: AuthService) {
+    super();
+  }
   async canActivate(context: ExecutionContext) {
-    // console.log('LocalAuthGuard.canActivate()');
-    // uncomment below line to view sessionStore
-    // console.log('LocalAuthGuard.canActivate()', context);
+    console.log('LocalAuthGuard.canActivate()');
+    const handlerName = context.getHandler().name;
+
+    // const x = context.switchToHttp().getRequest().headers.cookie;
+    // console.log('LocalAuthGuard Cookie: ', x);
+
+    if (handlerName === 'signup') {
+      const body = context.switchToHttp().getRequest().body;
+      await this.authService.signup(body);
+    }
 
     const result = (await super.canActivate(context)) as boolean;
-    // console.log('LocalAuthGuard.canActivate() result', result);
+    console.log('LocalAuthGuard.canActivate() result', result);
 
     const request = context.switchToHttp().getRequest();
     // console.log('LocalAuthGuard Request', request);
@@ -48,6 +59,7 @@ export class SessionGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     console.log('SessionGuard.canActivate()');
+    // Maybe this is where I should create the session for the user when they signup?
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
