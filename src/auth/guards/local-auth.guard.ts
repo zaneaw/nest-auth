@@ -26,28 +26,22 @@ export class LocalAuthGuard extends AuthGuard('local') {
     super();
   }
   async canActivate(context: ExecutionContext) {
-    // console.log('LocalAuthGuard.canActivate()');
+    const request = context.switchToHttp().getRequest();
     const handlerName = context.getHandler().name;
-    const cookie = context.switchToHttp().getRequest().headers.cookie;
-    console.log('LocalAuthGuard.canActivate() cookie', cookie);
 
+    // if the user is already logged in, throw an error 
+    if (request.isAuthenticated()) {
+      throw new BadRequestException('Already logged in');
+    }
+    
     // if it's the signup route, sign the user up first
     if (handlerName === 'signup') {
-      // if the user is already logged in, throw an error
-      // this works but if a user logs out and then back in, they will get this error
-      if (cookie && cookie.includes('bday.sid')) {
-        throw new BadRequestException('Already logged in');
-      }
-
-      const body = context.switchToHttp().getRequest().body;
+      const body = request.body;
       await this.authService.signup(body);
     }
 
     const result = (await super.canActivate(context)) as boolean;
     // console.log('LocalAuthGuard.canActivate() result', result);
-
-    const request = context.switchToHttp().getRequest();
-    // console.log('LocalAuthGuard Request', request);
 
     await super.logIn(request);
     // console.log('LocalAuthGuard Request after logIn', request);
