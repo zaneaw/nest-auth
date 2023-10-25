@@ -1,31 +1,27 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
-import * as argon2 from 'argon2';
-import { UsersService } from '../users/users.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
+import * as argon2 from 'argon2';
+import { type User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { SignInDto, SignUpDto } from './dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
     private prisma: PrismaService,
+    private usersService: UsersService,
   ) {}
 
-  async signIn(signInDto: SignInDto) {
-    const user = await this.usersService.findOne(signInDto.username);
+  async validateUser(username: string, password: string): Promise<any> {
+    // console.log('Validate User');
+    const user = await this.usersService.findOne(username);
 
-    const passwordsMatch = await argon2.verify(
-      user?.password,
-      signInDto.password,
-    );
+    // console.log('validateUser user: ', user);
+
+    const passwordsMatch = await argon2.verify(user?.password, password);
 
     if (!passwordsMatch) {
-      throw new UnauthorizedException();
+      return null;
     }
 
     delete user.password;
@@ -33,30 +29,86 @@ export class AuthService {
     return user;
   }
 
-  async signUp(signUpDto: SignUpDto) {
-    const hashedPassword = await argon2.hash(signUpDto.password);
+  async signup(data: {
+    email: string;
+    username: string;
+    password: string;
+  }): Promise<User> {
+    if (!data.email || !data.username || !data.password) {
+      throw new BadRequestException('Email, username, and password required');
+    }
+
+    const hashedPassword = await argon2.hash(data.password);
 
     const user = await this.prisma.user
       .create({
         data: {
-          email: signUpDto.email,
-          username: signUpDto.username,
+          email: data.email,
+          username: data.username,
           password: hashedPassword,
         },
       })
-      .catch((error) => {
-        if (error instanceof PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-            throw new BadRequestException('User already exists');
+      .catch((err) => {
+        if (err instanceof PrismaClientKnownRequestError) {
+          // unique constraint failed
+          if (err.code === 'P2002') {
+            throw new BadRequestException('Username or Email is already taken');
           }
         }
 
-        throw error;
+        throw err;
       });
 
-    if (!user) {
-      throw new BadRequestException('Error creating user');
+    delete user.password;
+
+    return user;
+  }
+
+  async signin(data: {
+    password: string;
+    email?: string;
+    username?: string;
+  }): Promise<User | void> {
+    let user: User;
+
+    // console.log('Signin');
+    // console.log('data: ', data);
+
+    if (!data.email && !data.username) {
+      throw new BadRequestException('Email or username is required');
     }
+
+    if (data.email) {
+      user = await this.prisma.user.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+    } else {
+      user = await this.prisma.user.findUnique({
+        where: {
+          username: data.username,
+        },
+      });
+    }
+
+    if (!user) {
+      throw new BadRequestException(
+        'Username, Email, or Password is incorrect',
+      );
+    }
+
+    // console.log(user);
+
+    const passwordsMatch = await argon2.verify(user?.password, data.password);
+
+    if (!passwordsMatch) {
+      throw new BadRequestException(
+        'Username, Email, or Password is incorrect',
+      );
+    }
+
+    // passport.authenticate('local', (err, user, info) => {});
 
     delete user.password;
 

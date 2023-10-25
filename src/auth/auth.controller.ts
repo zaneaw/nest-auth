@@ -1,19 +1,51 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { SignInDto, SignUpDto } from './dto';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { LocalAuthGuard } from './guards';
+import { Public } from '../common/utils/public-routes';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor() {}
 
-  @HttpCode(HttpStatus.OK)
+  @Public()
+  @UseGuards(LocalAuthGuard)
   @Post('signin')
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+  @HttpCode(200)
+  async signin() {
+    return true;
   }
 
+  @Public()
+  @UseGuards(LocalAuthGuard)
   @Post('signup')
-  signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signup() {
+    return true;
+  }
+
+  @Post('signout')
+  @HttpCode(200)
+  async signout(@Req() req) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+        throw new BadRequestException('Error signing out:\n', err);
+      }
+      return true;
+    });
+
+    return true;
+  }
+
+  @Get('test')
+  test() {
+    return 'test';
   }
 }
