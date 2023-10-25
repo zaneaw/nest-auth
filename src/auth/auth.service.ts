@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { UsersService } from 'src/users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
 import * as argon2 from 'argon2';
-import { User } from '@prisma/client';
+import { type User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    console.log('Validate User');
+    // console.log('Validate User');
     const user = await this.usersService.findOne(username);
 
     // console.log('validateUser user: ', user);
@@ -34,6 +34,10 @@ export class AuthService {
     username: string;
     password: string;
   }): Promise<User> {
+    if (!data.email || !data.username || !data.password) {
+      throw new BadRequestException('Email, username, and password required');
+    }
+
     const hashedPassword = await argon2.hash(data.password);
 
     const user = await this.prisma.user
@@ -67,7 +71,7 @@ export class AuthService {
   }): Promise<User | void> {
     let user: User;
 
-    console.log('Signin');
+    // console.log('Signin');
     // console.log('data: ', data);
 
     if (!data.email && !data.username) {

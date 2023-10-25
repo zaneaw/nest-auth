@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/utils/public-routes';
@@ -21,19 +26,25 @@ export class LocalAuthGuard extends AuthGuard('local') {
     super();
   }
   async canActivate(context: ExecutionContext) {
-    console.log('LocalAuthGuard.canActivate()');
+    // console.log('LocalAuthGuard.canActivate()');
     const handlerName = context.getHandler().name;
+    const cookie = context.switchToHttp().getRequest().headers.cookie;
+    console.log('LocalAuthGuard.canActivate() cookie', cookie);
 
-    // const x = context.switchToHttp().getRequest().headers.cookie;
-    // console.log('LocalAuthGuard Cookie: ', x);
-
+    // if it's the signup route, sign the user up first
     if (handlerName === 'signup') {
+      // if the user is already logged in, throw an error
+      // this works but if a user logs out and then back in, they will get this error
+      if (cookie && cookie.includes('bday.sid')) {
+        throw new BadRequestException('Already logged in');
+      }
+
       const body = context.switchToHttp().getRequest().body;
       await this.authService.signup(body);
     }
 
     const result = (await super.canActivate(context)) as boolean;
-    console.log('LocalAuthGuard.canActivate() result', result);
+    // console.log('LocalAuthGuard.canActivate() result', result);
 
     const request = context.switchToHttp().getRequest();
     // console.log('LocalAuthGuard Request', request);
@@ -58,14 +69,13 @@ export class LocalAuthGuard extends AuthGuard('local') {
 export class SessionGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('SessionGuard.canActivate()');
-    // Maybe this is where I should create the session for the user when they signup?
+    // console.log('SessionGuard.canActivate()');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (isPublic) {
-      console.log('SessionGuard is Public');
+      // console.log('SessionGuard is Public');
       return true;
     }
 

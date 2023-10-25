@@ -21,4 +21,20 @@ export class UsersService {
       },
     });
   }
+
+  // Implement forgot password route
+
+  // Implement reset password route
+
+  // Implement change password route
+
+  // Implement change email route
+
+  // Implement change username route
+
+  // Implement delete account route
+
+  // Implement verify email route
+
+  // Implement resend verification email route
 }

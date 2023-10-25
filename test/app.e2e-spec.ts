@@ -37,20 +37,26 @@ describe('App e2e', () => {
       password: 'password',
     };
 
-    describe('Signup', () => {
-      it('should throw if email empty', () => {
+    const testUser2 = {
+      email: 'another@gmail.com',
+      username: 'another',
+      password: 'password',
+    };
+
+    describe('Auth', () => {
+      it('Should throw if email empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
           .withBody({
-            email: 's',
+            email: '',
             username: testUser.username,
             password: testUser.password,
           })
           .expectStatus(400);
       });
 
-      it('should throw if username empty', () => {
+      it('Should throw if username empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -62,7 +68,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should throw if password empty', () => {
+      it('Should throw if password empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -74,7 +80,24 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should create user', () => {
+      it('Should throw if email not valid', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: testUser.username,
+            password: '',
+          })
+          .expectStatus(400);
+      });
+      
+      it.todo('Should throw if email duplicate');
+      it.todo('Should throw if username duplicate');
+      it.todo('Should throw if password not valid');
+      it.todo('Login: Should throw if password not valid');
+
+      it('Should create user & session cookie', async () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -84,13 +107,18 @@ describe('App e2e', () => {
             password: testUser.password,
           })
           .expectStatus(201)
-          .expectJsonLike({
-            email: testUser.email,
-            username: testUser.username,
-          });
+          .stores('SessionCookie', "res.cookies['bday.sid']");
       });
 
-      it('should throw if user already exists', () => {
+      it('Should signout user', () => {
+        return pactum
+          .spec()
+          .post('/auth/signout')
+          .withCookies('bday.sid', '$S{SessionCookie}')
+          .expectStatus(200);
+      });
+
+      it('Should throw if user already exists', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -102,13 +130,44 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it.todo('verify session cookie');
-      it.todo('logout user');
-      it.todo('login user');
-      it.todo(
-        'should invalidate session cookies not on logout and require login again',
-      );
-      it.todo('should login again');
+      it('Should signin user', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            email: testUser.email,
+            username: testUser.username,
+            password: testUser.password,
+          })
+          .expectStatus(200)
+          .stores('SessionCookie', "res.cookies['bday.sid']")
+      });
+
+      it('Should throw if logged in user tries to signup again', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser2.email,
+            username: testUser2.username,
+            password: testUser2.password,
+          })
+          .withCookies('bday.sid', '$S{SessionCookie}')
+          .expectStatus(400);
+      });
+
+      it('Should throw if logged in user tries to login again', () => {
+        return pactum
+          .spec()
+          .post('/auth/signin')
+          .withBody({
+            email: testUser2.email,
+            username: testUser2.username,
+            password: testUser2.password,
+          })
+          .withCookies('bday.sid', '$S{SessionCookie}')
+          .expectStatus(400);
+      });
     });
   });
 });

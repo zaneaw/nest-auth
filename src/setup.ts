@@ -22,12 +22,13 @@ export function setup(app: INestApplication): INestApplication {
       resave: false,
       saveUninitialized: false,
       rolling: true,
+      name: 'bday.sid',
       cookie: {
         secure: process.env.NODE_ENV === 'production', // secure if prod
         maxAge:
           process.env.NODE_ENV === 'production'
             ? 1000 * 60 * 60 * 24 * 30 // 30 days for prod
-            : 1000 * 60 * 1, // 1 min for dev
+            : 1000 * 60 * 4, // 4 mins for dev
       },
       store: new PrismaSessionStore(new PrismaClient(), {
         checkPeriod:
