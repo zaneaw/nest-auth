@@ -4,6 +4,7 @@ import * as pactum from 'pactum';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AppModule } from '../src/app.module';
 import { setup } from '../src/setup';
+import * as colors from 'colors';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -107,14 +108,35 @@ describe('App e2e', () => {
             password: testUser.password,
           })
           .expectStatus(201)
-          .stores('SessionCookie', "res.cookies['bday.sid']");
+          .stores((req, res) => {
+            const sessionId = res.headers['set-cookie'][0];
+            console.log(colors.cyan(`COOKIE: ${sessionId}`));
+            return { sessionId }
+          });
+          // .stores('SessionCookie', "res.headers['set-cookie']");
       });
+
+      // it('Should create user & session cookie', async () => {
+      //   const cookie = await pactum
+      //     .spec()
+      //     .post('/auth/signup')
+      //     .withBody({
+      //       email: testUser.email,
+      //       username: testUser.username,
+      //       password: testUser.password,
+      //     })
+      //     .returns((ctx) => {
+      //       return ctx.res.headers['set-cookie'][0];
+      //     });
+  
+      //   console.log(colors.cyan(`COOKIE: ${cookie}`));
+      // });
 
       it('Should signout user', () => {
         return pactum
           .spec()
           .post('/auth/signout')
-          .withCookies('bday.sid', '$S{SessionCookie}')
+          .withCookies('$S{sessionId}')
           .expectStatus(200);
       });
 
@@ -140,7 +162,11 @@ describe('App e2e', () => {
             password: testUser.password,
           })
           .expectStatus(200)
-          .stores('SessionCookie', "res.cookies['bday.sid']")
+          .stores((req, res) => {
+            const sessionId = res.headers['set-cookie'][0];
+            console.log(colors.cyan(`COOKIE: ${sessionId}`));
+            return { sessionId }
+          });
       });
 
       it('Should throw if logged in user tries to signup again', () => {
@@ -152,7 +178,7 @@ describe('App e2e', () => {
             username: testUser2.username,
             password: testUser2.password,
           })
-          .withCookies('bday.sid', '$S{SessionCookie}')
+          .withCookies('$S{sessionId}')
           .expectStatus(400);
       });
 
@@ -165,7 +191,7 @@ describe('App e2e', () => {
             username: testUser2.username,
             password: testUser2.password,
           })
-          .withCookies('bday.sid', '$S{SessionCookie}')
+          .withCookies('$S{sessionId}')
           .expectStatus(400);
       });
     });
