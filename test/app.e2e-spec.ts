@@ -19,12 +19,12 @@ describe('App e2e', () => {
 
     // start server
     await app.init();
-    await app.listen(3333);
+    await app.listen(3334);
 
     prisma = app.get(PrismaService);
     await prisma.cleanDb();
 
-    pactum.request.setBaseUrl('http://localhost:3333');
+    pactum.request.setBaseUrl('http://localhost:3334');
   });
 
   afterAll(() => {
@@ -45,7 +45,7 @@ describe('App e2e', () => {
     };
 
     describe('Auth', () => {
-      it('Should throw if email empty', () => {
+      it('should throw if email empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -57,7 +57,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('Should throw if username empty', () => {
+      it('should throw if username empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -69,7 +69,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('Should throw if password empty', () => {
+      it('should throw if password empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -81,7 +81,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('Should throw if email not valid', () => {
+      it('should throw if email not valid', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -92,13 +92,16 @@ describe('App e2e', () => {
           })
           .expectStatus(400);
       });
-      
-      it.todo('Should throw if email duplicate');
-      it.todo('Should throw if username duplicate');
-      it.todo('Should throw if password not valid');
-      it.todo('Login: Should throw if password not valid');
 
-      it('Should create user & session cookie', async () => {
+      it.todo("should throw if username's not long enough");
+      it.todo("should throw if password's not long enough");
+      it.todo("should throw if email isn't an email");
+      it.todo('should throw if email duplicate');
+      it.todo('should throw if username duplicate');
+      it.todo('should throw if password not valid');
+      it.todo('login: should throw if password not valid');
+
+      it('should create user & session cookie', async () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -109,14 +112,18 @@ describe('App e2e', () => {
           })
           .expectStatus(201)
           .stores((req, res) => {
+            console.log(
+              colors.bgYellow(
+                `res.headers.cookies: ${JSON.stringify(res.headers, null, 4)}`,
+              ),
+            );
             const sessionId = res.headers['set-cookie'][0];
-            console.log(colors.cyan(`COOKIE: ${sessionId}`));
-            return { sessionId }
+            console.log(colors.cyan(`scu&sc.COOKIE: ${sessionId}`));
+            return { sessionId };
           });
-          // .stores('SessionCookie', "res.headers['set-cookie']");
       });
 
-      // it('Should create user & session cookie', async () => {
+      // it('should create user & session cookie', async () => {
       //   const cookie = await pactum
       //     .spec()
       //     .post('/auth/signup')
@@ -128,11 +135,11 @@ describe('App e2e', () => {
       //     .returns((ctx) => {
       //       return ctx.res.headers['set-cookie'][0];
       //     });
-  
+
       //   console.log(colors.cyan(`COOKIE: ${cookie}`));
       // });
 
-      it('Should signout user', () => {
+      it('should signout user', () => {
         return pactum
           .spec()
           .post('/auth/signout')
@@ -140,7 +147,7 @@ describe('App e2e', () => {
           .expectStatus(200);
       });
 
-      it('Should throw if user already exists', () => {
+      it('should throw if user already exists', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -152,24 +159,47 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('Should signin user', () => {
+      // must use the 'username' field to login
+      it('should login user with email', () => {
         return pactum
           .spec()
-          .post('/auth/signin')
+          .post('/auth/login')
           .withBody({
-            email: testUser.email,
+            username: testUser.email,
+            password: testUser.password,
+          })
+          .expectStatus(200)
+          .stores((req, res) => {
+            const sessionId = res.headers['set-cookie'][0];
+            console.log(colors.cyan(`sluwe.COOKIE: ${sessionId}`));
+            return { sessionId };
+          });
+      });
+      it('should signout user', () => {
+        return pactum
+          .spec()
+          .post('/auth/signout')
+          .withCookies('$S{sessionId}')
+          .expectStatus(200);
+      });
+
+      it('should login user with username', () => {
+        return pactum
+          .spec()
+          .post('/auth/login')
+          .withBody({
             username: testUser.username,
             password: testUser.password,
           })
           .expectStatus(200)
           .stores((req, res) => {
             const sessionId = res.headers['set-cookie'][0];
-            console.log(colors.cyan(`COOKIE: ${sessionId}`));
-            return { sessionId }
+            console.log(colors.cyan(`sluwu.COOKIE: ${sessionId}`));
+            return { sessionId };
           });
       });
 
-      it('Should throw if logged in user tries to signup again', () => {
+      it('should throw if logged in user tries to signup again', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -182,14 +212,14 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('Should throw if logged in user tries to login again', () => {
+      it('should throw if logged in user tries to login again', () => {
         return pactum
           .spec()
-          .post('/auth/signin')
+          .post('/auth/login')
           .withBody({
-            email: testUser2.email,
-            username: testUser2.username,
-            password: testUser2.password,
+            email: testUser.email,
+            username: testUser.username,
+            password: testUser.password,
           })
           .withCookies('$S{sessionId}')
           .expectStatus(400);

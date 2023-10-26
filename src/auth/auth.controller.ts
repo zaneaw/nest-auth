@@ -5,7 +5,6 @@ import {
   HttpCode,
   Post,
   Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards';
@@ -17,9 +16,9 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Post('signin')
+  @Post('login')
   @HttpCode(200)
-  async signin() {
+  async login() {
     return true;
   }
 
@@ -33,6 +32,7 @@ export class AuthController {
   @Post('signout')
   @HttpCode(200)
   async signout(@Req() req) {
+    // deletes user from session, preventing authentication. Does NOT automatically delete the cookie.
     req.session.destroy((err) => {
       if (err) {
         console.log(err);

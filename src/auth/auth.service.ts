@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import * as argon2 from 'argon2';
 import { type User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { SignupDto } from './dto/index';
 
 @Injectable()
 export class AuthService {
@@ -12,11 +13,14 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    // console.log('Validate User');
-    const user = await this.usersService.findOne(username);
-
-    // console.log('validateUser user: ', user);
+  /**
+   * @param usernameOrEmail
+   * @param password
+   * @returns
+   * @calls validate() in user.service.ts
+   */
+  async validateUser(usernameOrEmail: string, password: string): Promise<any> {
+    const user = await this.usersService.findUser(usernameOrEmail);
 
     const passwordsMatch = await argon2.verify(user?.password, password);
 
@@ -29,22 +33,18 @@ export class AuthService {
     return user;
   }
 
-  async signup(data: {
-    email: string;
-    username: string;
-    password: string;
-  }): Promise<User> {
-    if (!data.email || !data.username || !data.password) {
+  async signup(authDto: SignupDto): Promise<User> {
+    if (!authDto.email || !authDto.username || !authDto.password) {
       throw new BadRequestException('Email, username, and password required');
     }
 
-    const hashedPassword = await argon2.hash(data.password);
+    const hashedPassword = await argon2.hash(authDto.password);
 
     const user = await this.prisma.user
       .create({
         data: {
-          email: data.email,
-          username: data.username,
+          email: authDto.email,
+          username: authDto.username,
           password: hashedPassword,
         },
       })
@@ -64,54 +64,40 @@ export class AuthService {
     return user;
   }
 
-  async signin(data: {
-    password: string;
-    email?: string;
-    username?: string;
-  }): Promise<User | void> {
-    let user: User;
+  // async login(authDto: AuthDto): Promise<User | void> {
+  //   if (!authDto.email && !authDto.username) {
+  //     throw new BadRequestException('Email or username is required');
+  //   }
 
-    // console.log('Signin');
-    // console.log('data: ', data);
+  //   const user = await this.prisma.user.findUnique({
+  //     where: {
+  //       ...(authDto.email
+  //         ? { email: authDto.email }
+  //         : { username: authDto.username }),
+  //     },
+  //   });
 
-    if (!data.email && !data.username) {
-      throw new BadRequestException('Email or username is required');
-    }
+  //   if (!user) {
+  //     throw new BadRequestException(
+  //       'Username, Email, or Password is incorrect',
+  //     );
+  //   }
 
-    if (data.email) {
-      user = await this.prisma.user.findUnique({
-        where: {
-          email: data.email,
-        },
-      });
-    } else {
-      user = await this.prisma.user.findUnique({
-        where: {
-          username: data.username,
-        },
-      });
-    }
+  //   const passwordsMatch = await argon2.verify(
+  //     user?.password,
+  //     authDto.password,
+  //   );
 
-    if (!user) {
-      throw new BadRequestException(
-        'Username, Email, or Password is incorrect',
-      );
-    }
+  //   if (!passwordsMatch) {
+  //     throw new BadRequestException(
+  //       'Username, Email, or Password is incorrect',
+  //     );
+  //   }
 
-    // console.log(user);
+  //   // passport.authenticate('local', (err, user, info) => {});
 
-    const passwordsMatch = await argon2.verify(user?.password, data.password);
+  //   delete user.password;
 
-    if (!passwordsMatch) {
-      throw new BadRequestException(
-        'Username, Email, or Password is incorrect',
-      );
-    }
-
-    // passport.authenticate('local', (err, user, info) => {});
-
-    delete user.password;
-
-    return user;
-  }
+  //   return user;
+  // }
 }

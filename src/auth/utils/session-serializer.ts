@@ -17,7 +17,6 @@ export class SessionSerializer extends PassportSerializer {
     user: User,
     done: (err, user: { id: number; username: string }) => void,
   ) {
-    // console.log('SERIALIZE USER', user);
     return done(null, {
       id: user.id,
       username: user.username,
@@ -28,7 +27,6 @@ export class SessionSerializer extends PassportSerializer {
     user: { id: number; username: string },
     done: (err, user: User) => void,
   ) {
-    // console.log('DESERIALIZE USER: ', user);
     const userFromSession = await this.usersService.findUserById(user.id);
 
     if (!userFromSession) {
