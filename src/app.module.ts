@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { SessionGuard } from './auth/guards';
-import { TesterModule } from './tester/tester.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { TesterModule } from './tester/tester.module';
     AuthModule,
     UsersModule,
     PassportModule.register({ session: true }),
-    TesterModule,
   ],
   controllers: [],
   // providers: [PrismaService],

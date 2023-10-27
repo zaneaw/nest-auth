@@ -34,7 +34,7 @@ export class LocalAuthGuard extends AuthGuard('local') {
     }
 
     const handlerName = context.getHandler().name;
-    console.log('LocalAuthGuard.canActivate() handlerName', handlerName);
+    // console.log('LocalAuthGuard.canActivate() handlerName', handlerName);
 
     // if it's the signup route, sign the user up first
     if (handlerName === 'signup') {
@@ -42,9 +42,9 @@ export class LocalAuthGuard extends AuthGuard('local') {
       await this.authService.signup(body);
     }
 
-    console.log('LocalAuthGuard.canActivate()');
+    // console.log('LocalAuthGuard.canActivate()');
     const result = (await super.canActivate(context)) as boolean;
-    console.log('LocalAuthGuard.canActivate() result', result);
+    // console.log('LocalAuthGuard.canActivate() result', result);
 
     await super.logIn(request);
 

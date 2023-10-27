@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   email    String @unique
   username String @unique
@@ -29,7 +29,7 @@ model Post {
   published Boolean? @default(false)
 
   author   User? @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId Int?
+  authorId String?
 }
 
 model Session {

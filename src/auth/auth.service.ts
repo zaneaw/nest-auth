@@ -1,17 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import * as argon2 from 'argon2';
-import { type User } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { SignupDto } from './dto/index';
+import { CreateUserDto } from '../users/dto';
+import { UserWithoutPassword } from 'types';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private usersService: UsersService) {}
 
   /**
    * @param usernameOrEmail
@@ -19,49 +13,15 @@ export class AuthService {
    * @returns
    * @calls validate() in user.service.ts
    */
-  async validateUser(usernameOrEmail: string, password: string): Promise<any> {
-    const user = await this.usersService.findUser(usernameOrEmail);
-
-    const passwordsMatch = await argon2.verify(user?.password, password);
-
-    if (!passwordsMatch) {
-      return null;
-    }
-
-    delete user.password;
-
-    return user;
+  async validateUser(
+    usernameOrEmail: string,
+    password: string,
+  ): Promise<UserWithoutPassword> {
+    return this.usersService.validateUser(usernameOrEmail, password);
   }
 
-  async signup(authDto: SignupDto): Promise<User> {
-    if (!authDto.email || !authDto.username || !authDto.password) {
-      throw new BadRequestException('Email, username, and password required');
-    }
-
-    const hashedPassword = await argon2.hash(authDto.password);
-
-    const user = await this.prisma.user
-      .create({
-        data: {
-          email: authDto.email,
-          username: authDto.username,
-          password: hashedPassword,
-        },
-      })
-      .catch((err) => {
-        if (err instanceof PrismaClientKnownRequestError) {
-          // unique constraint failed
-          if (err.code === 'P2002') {
-            throw new BadRequestException('Username or Email is already taken');
-          }
-        }
-
-        throw err;
-      });
-
-    delete user.password;
-
-    return user;
+  async signup(data: CreateUserDto): Promise<UserWithoutPassword> {
+    return this.usersService.createUser(data);
   }
 
   // async login(authDto: AuthDto): Promise<User | void> {
