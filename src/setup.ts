@@ -8,6 +8,12 @@ import * as passport from 'passport';
 export function setup(app: INestApplication): INestApplication {
   // app.use(logger);
 
+  app.enableCors({
+    origin: [process.env.CORS_ORIGIN_WEB],
+    credentials: true,
+    allowedHeaders: ['Content-Type'],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

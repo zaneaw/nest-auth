@@ -5,6 +5,7 @@ import {
   HttpCode,
   Post,
   Req,
+  Session,
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards';
@@ -18,15 +19,15 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(200)
-  async login() {
-    return true;
+  async login(@Session() session: any) {
+    return session.passport.user;
   }
 
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('signup')
-  async signup() {
-    return true;
+  async signup(@Session() session: any) {
+    return session.passport.user;
   }
 
   @Post('signout')
@@ -45,7 +46,7 @@ export class AuthController {
   }
 
   @Get('test')
-  test(@Req() req) {
+  test() {
     // console.log('REQ: ', req.session);
     return 'test';
   }
