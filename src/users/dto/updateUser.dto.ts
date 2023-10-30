@@ -1,4 +1,5 @@
 import {
+  IsDate,
   IsEmail,
   IsOptional,
   IsString,
@@ -21,4 +22,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(32)
+  password?: string;
+
+  @IsOptional()
+  @IsDate()
+  passwordUpdatedAt?: Date;
 }

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon2 from 'argon2';
-import { UserWithoutPassword } from '../../types';
+import { UserSession, UserWithoutPassword, UsersForList } from '../../types';
 
 @Injectable()
 export class UsersService {
@@ -43,7 +43,16 @@ export class UsersService {
   async updateUser(
     username: string,
     data: UpdateUserDto,
+    session: UserSession,
   ): Promise<UserWithoutPassword> {
+    const updatedPassword = data.password ? true : false;
+
+    // hash the new password before saving to DB
+    if (updatedPassword) {
+      data.password = await argon2.hash(data.password);
+      data.passwordUpdatedAt = new Date();
+    }
+
     const user = await this.prisma.user
       .update({
         where: {
@@ -61,6 +70,10 @@ export class UsersService {
 
         throw err;
       });
+
+    if (updatedPassword) {
+      session.sessionCreatedAt = Date.now();
+    }
 
     delete user.password;
 
@@ -94,7 +107,10 @@ export class UsersService {
     return user;
   }
 
-  async getUserById(id: string): Promise<UserWithoutPassword> {
+  async getUserById(
+    id: string,
+    sessionCreatedAt: number,
+  ): Promise<UserWithoutPassword> {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
@@ -103,6 +119,17 @@ export class UsersService {
 
     if (!user) {
       throw new BadRequestException('Error finding user');
+    }
+
+    console.log(
+      'getUserById: sessionCreatedAt',
+      sessionCreatedAt,
+      user.passwordUpdatedAt.getTime(),
+    );
+
+    if (sessionCreatedAt < user.passwordUpdatedAt.getTime()) {
+      console.info('Session has expired. Try logging in again.');
+      return null;
     }
 
     delete user.password;
@@ -126,11 +153,10 @@ export class UsersService {
     return user;
   }
 
-  async getUsers(): Promise<UserWithoutPassword[]> {
+  async getUsers(): Promise<UsersForList[]> {
     const users = await this.prisma.user.findMany({
       select: {
         id: true,
-        email: true,
         username: true,
         name: true,
       },

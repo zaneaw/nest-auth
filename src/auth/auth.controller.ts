@@ -45,7 +45,8 @@ export class AuthController {
   }
 
   @Get('test')
-  test() {
+  test(@Req() req) {
+    // console.log('REQ: ', req.session);
     return 'test';
   }
 }

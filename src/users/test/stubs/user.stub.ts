@@ -7,6 +7,7 @@ export const userStubWithPassword = (): User => {
     username: 'test',
     password: 'password',
     name: 'Test User',
+    passwordUpdatedAt: new Date(),
   };
 };
 

@@ -6,7 +6,7 @@ import {
   userStubWithPassword,
   userStubWithoutPassword,
 } from './stubs';
-import { UserWithoutPassword } from '../../../types';
+import { UserWithoutPassword, UsersForList } from '../../../types';
 
 jest.mock('../users.service.ts');
 
@@ -98,7 +98,7 @@ describe('UsersController', () => {
 
   describe('getUsers', () => {
     describe('when getUsers is called', () => {
-      let users: UserWithoutPassword[] = [];
+      let users: UsersForList[] = [];
 
       beforeEach(async () => {
         users = await usersController.getUsers();
