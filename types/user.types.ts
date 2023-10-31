@@ -10,6 +10,7 @@ export type UsersForList = {
 
 export type UserSession = {
   id: string;
+  name: string;
   username: string;
-  sessionCreatedAt: number;
+  sessionVerifiedAt: number;
 };

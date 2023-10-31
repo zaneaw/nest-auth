@@ -65,13 +65,11 @@ export class LocalAuthGuard extends AuthGuard('local') {
 export class SessionGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // console.log('SessionGuard.canActivate()');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (isPublic) {
-      // console.log('SessionGuard is Public');
       return true;
     }
 

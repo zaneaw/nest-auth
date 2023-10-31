@@ -71,8 +71,12 @@ export class UsersService {
         throw err;
       });
 
+    // update session info, ID should not change
+    session.username = user.username;
+    session.name = user.name;
+
     if (updatedPassword) {
-      session.sessionCreatedAt = Date.now();
+      session.sessionVerifiedAt = Date.now();
     }
 
     delete user.password;
@@ -109,7 +113,7 @@ export class UsersService {
 
   async getUserById(
     id: string,
-    sessionCreatedAt: number,
+    sessionVerifiedAt: number,
   ): Promise<UserWithoutPassword> {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -121,15 +125,11 @@ export class UsersService {
       throw new BadRequestException('Error finding user');
     }
 
-    console.log(
-      'getUserById: sessionCreatedAt',
-      sessionCreatedAt,
-      user.passwordUpdatedAt.getTime(),
-    );
-
-    if (sessionCreatedAt < user.passwordUpdatedAt.getTime()) {
+    if (sessionVerifiedAt < user.passwordUpdatedAt.getTime()) {
       console.info('Session has expired. Try logging in again.');
-      return null;
+      throw new BadRequestException(
+        'Session has expired. Try logging in again.',
+      );
     }
 
     delete user.password;

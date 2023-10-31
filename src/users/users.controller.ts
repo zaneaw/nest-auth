@@ -23,7 +23,7 @@ export class UsersController {
    * Returns the user from the session
    */
   @Get()
-  async getMe(@Session() session: any): Promise<UserSession> {
+  async getCurrentUser(@Session() session: any): Promise<UserSession> {
     // console.log('SESSION: ', session);
     // return this.usersService.getMe(req);
     return session.passport.user;
