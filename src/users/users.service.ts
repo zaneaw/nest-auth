@@ -111,13 +111,10 @@ export class UsersService {
     return user;
   }
 
-  async getUserById(
-    id: string,
-    sessionVerifiedAt: number,
-  ): Promise<UserWithoutPassword> {
+  async getUserById(userSession: UserSession): Promise<UserWithoutPassword> {
     const user = await this.prisma.user.findUnique({
       where: {
-        id,
+        id: userSession.id,
       },
     });
 
@@ -125,12 +122,16 @@ export class UsersService {
       throw new BadRequestException('Error finding user');
     }
 
-    if (sessionVerifiedAt < user.passwordUpdatedAt.getTime()) {
-      console.info('Session has expired. Try logging in again.');
+    if (userSession.sessionVerifiedAt < user.passwordUpdatedAt.getTime()) {
+      // console.info('Session has expired. Try logging in again.');
       throw new BadRequestException(
         'Session has expired. Try logging in again.',
       );
     }
+
+    userSession.username = user.username;
+    userSession.name = user.name;
+    userSession.sessionVerifiedAt = Date.now();
 
     delete user.password;
 

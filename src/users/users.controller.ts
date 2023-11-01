@@ -15,6 +15,8 @@ import type {
   UsersForList,
 } from '../../types';
 
+type UserSessionNoVerifiedAt = Omit<UserSession, 'sessionVerifiedAt'>;
+
 @Controller('user')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -23,9 +25,10 @@ export class UsersController {
    * Returns the user from the session
    */
   @Get('currentUser')
-  async currentUser(@Session() session: any): Promise<UserSession> {
-    // return this.usersService.getMe(req);
-    return session.passport.user;
+  async currentUser(@Session() session: any): Promise<UserSessionNoVerifiedAt> {
+    console.log('currentUser()', session);
+    const user = await this.usersService.getUserById(session.passport.user);
+    return { username: user.username, name: user.name, id: user.id };
   }
 
   @Get('all')
