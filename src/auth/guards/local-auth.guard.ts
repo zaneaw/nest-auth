@@ -72,7 +72,7 @@ export class SessionGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
-
+    // console.log('SessionGuard.canActivate()');
     const request = context.switchToHttp().getRequest();
 
     return request.isAuthenticated();
