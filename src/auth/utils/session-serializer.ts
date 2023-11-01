@@ -29,7 +29,7 @@ export class SessionSerializer extends PassportSerializer {
 
   // don't hit the DB on every request, just return the user from the session
   // user controller /currentUser will run the first time a user hits the site
-  // and update the user in the session for us.
+  // and update the user in the session for us and update the expiration.
   async deserializeUser(user: UserSession, done: (err, user: any) => void) {
     // const userFromSession: UserWithoutPassword =
     //   await this.usersService.currentUser(user.id, user.sessionVerifiedAt);
