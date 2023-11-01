@@ -48,6 +48,6 @@ export class AuthController {
   @Get('test')
   test() {
     // console.log('REQ: ', req.session);
-    return 'test';
+    return { data: 'test' };
   }
 }
