@@ -27,7 +27,7 @@ export class UsersController {
   @Get('currentUser')
   async currentUser(@Session() session: any): Promise<UserSessionNoVerifiedAt> {
     console.log('currentUser()', session);
-    const user = await this.usersService.getUserById(session.passport.user);
+    const user = await this.usersService.currentUser(session.passport.user);
     return { username: user.username, name: user.name, id: user.id };
   }
 

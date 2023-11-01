@@ -111,7 +111,7 @@ export class UsersService {
     return user;
   }
 
-  async getUserById(userSession: UserSession): Promise<UserWithoutPassword> {
+  async currentUser(userSession: UserSession): Promise<UserWithoutPassword> {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userSession.id,

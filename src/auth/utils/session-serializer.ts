@@ -32,7 +32,7 @@ export class SessionSerializer extends PassportSerializer {
   // and update the user in the session for us.
   async deserializeUser(user: UserSession, done: (err, user: any) => void) {
     // const userFromSession: UserWithoutPassword =
-    //   await this.usersService.getUserById(user.id, user.sessionVerifiedAt);
+    //   await this.usersService.currentUser(user.id, user.sessionVerifiedAt);
     // console.log('deserializeUser()', user);
     // if (!userFromSession) {
     //   return done(null, null);
