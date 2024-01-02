@@ -93,14 +93,68 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      // it.todo("should throw if username's not long enough");
-      // it.todo('should throw if username contains invalid characters');
-      // it.todo("should throw if password's not long enough");
-      // it.todo("should throw if email isn't an email");
-      // it.todo('should throw if email duplicate');
-      // it.todo('should throw if username duplicate');
-      // it.todo('should throw if password not valid');
-      // it.todo('login: should throw if password not valid');
+      it("signup should throw if username's not long enough", () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: 'ab',
+            password: testUser.password,
+          })
+          .expectStatus(400);
+      });
+
+      it("signup should throw if username's too long", () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: 'thisusernameistoolongtobevalid',
+            password: testUser.password,
+          })
+          .expectStatus(400);
+      });
+
+      it('signup should throw if username contains invalid characters', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: 'usern@me',
+            password: testUser.password,
+          })
+          .expectStatus(400);
+      });
+
+      it("signup should throw if password's not long enough", () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: testUser.username,
+            password: '1234567',
+          })
+          .expectStatus(400);
+      });
+
+      it("signup should throw if password's too long", () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: testUser.username,
+            password:
+              'thisisareallylongpasswordthatshouldnotbevalideverbecauseofthelength',
+          })
+          .expectStatus(400);
+      });
+
+      it.todo('login should throw if password not valid');
 
       it('signup should create user & session cookie', async () => {
         return pactum
@@ -159,6 +213,9 @@ describe('App e2e', () => {
           })
           .expectStatus(400);
       });
+
+      it.todo('signup should throw if email duplicate');
+      it.todo('signup should throw if username duplicate');
 
       // must use the 'username' field to login
       it('login should login user with email', () => {
