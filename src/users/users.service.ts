@@ -4,15 +4,25 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon2 from 'argon2';
 import { UserSession, UserWithoutPassword, UsersForList } from '../../types';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async createUser(data: CreateUserDto): Promise<UserWithoutPassword> {
-    if (!data.email || !data.username || !data.password) {
-      throw new BadRequestException('Email, username, and password required');
-    }
+    const valUser = new CreateUserDto();
+    valUser.email = data.email;
+    valUser.username = data.username;
+    valUser.password = data.password;
+
+    await validate(valUser).then((errors) => {
+      if (errors.length > 0) {
+        throw new BadRequestException('Email, username, and password required');
+      } else {
+        console.log('No errors');
+      }
+    });
 
     const hashedPassword = await argon2.hash(data.password);
 

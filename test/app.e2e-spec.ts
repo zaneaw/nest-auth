@@ -45,7 +45,7 @@ describe('App e2e', () => {
     };
 
     describe('Auth', () => {
-      it('should throw if email empty', () => {
+      it('signup should throw if email empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -57,7 +57,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should throw if username empty', () => {
+      it('signup should throw if username empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -69,7 +69,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should throw if password empty', () => {
+      it('signup should throw if password empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -81,27 +81,28 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should throw if email not valid', () => {
+      it('signup should throw if email not valid', () => {
         return pactum
           .spec()
           .post('/auth/signup')
           .withBody({
-            email: testUser.email,
+            email: 'notanemail',
             username: testUser.username,
-            password: '',
+            password: testUser.password,
           })
           .expectStatus(400);
       });
 
-      it.todo("should throw if username's not long enough");
-      it.todo("should throw if password's not long enough");
-      it.todo("should throw if email isn't an email");
-      it.todo('should throw if email duplicate');
-      it.todo('should throw if username duplicate');
-      it.todo('should throw if password not valid');
-      it.todo('login: should throw if password not valid');
+      // it.todo("should throw if username's not long enough");
+      // it.todo('should throw if username contains invalid characters');
+      // it.todo("should throw if password's not long enough");
+      // it.todo("should throw if email isn't an email");
+      // it.todo('should throw if email duplicate');
+      // it.todo('should throw if username duplicate');
+      // it.todo('should throw if password not valid');
+      // it.todo('login: should throw if password not valid');
 
-      it('should create user & session cookie', async () => {
+      it('signup should create user & session cookie', async () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -139,7 +140,7 @@ describe('App e2e', () => {
       //   console.log(colors.cyan(`COOKIE: ${cookie}`));
       // });
 
-      it('should signout user', () => {
+      it('signout should signout user', () => {
         return pactum
           .spec()
           .post('/auth/signout')
@@ -147,7 +148,7 @@ describe('App e2e', () => {
           .expectStatus(200);
       });
 
-      it('should throw if user already exists', () => {
+      it('signup should throw if user already exists', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -160,7 +161,7 @@ describe('App e2e', () => {
       });
 
       // must use the 'username' field to login
-      it('should login user with email', () => {
+      it('login should login user with email', () => {
         return pactum
           .spec()
           .post('/auth/login')
@@ -175,7 +176,7 @@ describe('App e2e', () => {
             return { sessionId };
           });
       });
-      it('should signout user', () => {
+      it('signout should signout user', () => {
         return pactum
           .spec()
           .post('/auth/signout')
@@ -183,7 +184,7 @@ describe('App e2e', () => {
           .expectStatus(200);
       });
 
-      it('should login user with username', () => {
+      it('login should login user with username', () => {
         return pactum
           .spec()
           .post('/auth/login')
@@ -199,7 +200,7 @@ describe('App e2e', () => {
           });
       });
 
-      it('should throw if logged in user tries to signup again', () => {
+      it('signup should throw if logged in user tries to signup again', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -212,7 +213,7 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it('should throw if logged in user tries to login again', () => {
+      it('login should throw if logged in user tries to login again', () => {
         return pactum
           .spec()
           .post('/auth/login')
