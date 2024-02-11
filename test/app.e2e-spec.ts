@@ -214,8 +214,29 @@ describe('App e2e', () => {
           .expectStatus(400);
       });
 
-      it.todo('signup should throw if email duplicate');
-      it.todo('signup should throw if username duplicate');
+      it('signup should throw if email is a duplicate', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: testUser.email,
+            username: 'thisshouldntcauseanerror',
+            password: testUser.password,
+          })
+          .expectStatus(400);
+      });
+
+      it('signup should throw if username is a duplicate', () => {
+        return pactum
+          .spec()
+          .post('/auth/signup')
+          .withBody({
+            email: 'random@gmail.com',
+            username: 'thisshouldntcauseanerror',
+            password: testUser.password,
+          })
+          .expectStatus(400);
+      });
 
       // must use the 'username' field to login
       it('login should login user with email', () => {
