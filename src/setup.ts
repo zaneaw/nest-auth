@@ -8,6 +8,12 @@ import * as passport from 'passport';
 export function setup(app: INestApplication): INestApplication {
   // app.use(logger);
 
+  app.enableCors({
+    origin: [process.env.CORS_ORIGIN_WEB, '*'],
+    credentials: true,
+    allowedHeaders: ['Content-Type'],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -18,16 +24,15 @@ export function setup(app: INestApplication): INestApplication {
 
   app.use(
     session({
-      secret: 'keyboard cat',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      rolling: true,
       name: 'bday.sid',
       cookie: {
         secure: process.env.NODE_ENV === 'production', // secure if prod
         maxAge:
           process.env.NODE_ENV === 'production'
-            ? 1000 * 60 * 60 * 24 * 30 // 30 days for prod
+            ? 1000 * 60 * 60 * 24 * 365 // 365 days for prod
             : 1000 * 60 * 4, // 4 mins for dev
       },
       store: new PrismaSessionStore(new PrismaClient(), {

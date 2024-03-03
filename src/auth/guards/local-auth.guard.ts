@@ -10,8 +10,8 @@ import { IS_PUBLIC_KEY } from '../../common/utils/public-routes';
 import { AuthService } from '../auth.service';
 
 /**
- * This guard is used to protect the /auth/login route.
- * It uses the LocalStrategy defined in src/auth/strategies/local.strategy.ts
+ * This guard is used to protect the '/auth/login' & '/auth/signup' route.
+ * It uses the LocalStrategy defined in ../strategies/local.strategy.ts
  * to validate the user's credentials.
  * If the credentials are valid, the user is logged in and the request is
  * allowed to proceed.
@@ -27,24 +27,26 @@ export class LocalAuthGuard extends AuthGuard('local') {
   }
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
-    const handlerName = context.getHandler().name;
 
-    // if the user is already logged in, throw an error 
+    // if the user is already logged in, throw an error
     if (request.isAuthenticated()) {
       throw new BadRequestException('Already logged in');
     }
-    
+
+    const handlerName = context.getHandler().name;
+    // console.log('LocalAuthGuard.canActivate() handlerName', handlerName);
+
     // if it's the signup route, sign the user up first
     if (handlerName === 'signup') {
       const body = request.body;
       await this.authService.signup(body);
     }
 
+    // console.log('LocalAuthGuard.canActivate()');
     const result = (await super.canActivate(context)) as boolean;
     // console.log('LocalAuthGuard.canActivate() result', result);
 
     await super.logIn(request);
-    // console.log('LocalAuthGuard Request after logIn', request);
 
     return result;
   }
@@ -63,16 +65,14 @@ export class LocalAuthGuard extends AuthGuard('local') {
 export class SessionGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // console.log('SessionGuard.canActivate()');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (isPublic) {
-      // console.log('SessionGuard is Public');
       return true;
     }
-
+    // console.log('SessionGuard.canActivate()');
     const request = context.switchToHttp().getRequest();
 
     return request.isAuthenticated();

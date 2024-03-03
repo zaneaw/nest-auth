@@ -1,11 +1,10 @@
 import {
   BadRequestException,
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
-  Res,
+  Session,
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards';
@@ -17,22 +16,23 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
-  @Post('signin')
+  @Post('login')
   @HttpCode(200)
-  async signin() {
-    return true;
+  async login(@Session() session: any) {
+    return session.passport.user;
   }
 
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('signup')
-  async signup() {
-    return true;
+  async signup(@Session() session: any) {
+    return session.passport.user;
   }
 
   @Post('signout')
   @HttpCode(200)
   async signout(@Req() req) {
+    // deletes user from session, preventing authentication. Does NOT automatically delete the cookie.
     req.session.destroy((err) => {
       if (err) {
         console.log(err);
@@ -42,10 +42,5 @@ export class AuthController {
     });
 
     return true;
-  }
-
-  @Get('test')
-  test() {
-    return 'test';
   }
 }
