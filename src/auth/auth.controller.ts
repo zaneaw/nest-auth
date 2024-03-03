@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
@@ -43,11 +42,5 @@ export class AuthController {
     });
 
     return true;
-  }
-
-  @Get('test')
-  test() {
-    // console.log('REQ: ', req.session);
-    return { data: 'test' };
   }
 }

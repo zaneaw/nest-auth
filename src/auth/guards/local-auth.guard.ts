@@ -10,7 +10,7 @@ import { IS_PUBLIC_KEY } from '../../common/utils/public-routes';
 import { AuthService } from '../auth.service';
 
 /**
- * This guard is used to protect the '/auth/login' route.
+ * This guard is used to protect the '/auth/login' & '/auth/signup' route.
  * It uses the LocalStrategy defined in ../strategies/local.strategy.ts
  * to validate the user's credentials.
  * If the credentials are valid, the user is logged in and the request is

@@ -13,14 +13,12 @@ import { SessionGuard } from './auth/guards';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // PostModule,
     PrismaModule,
     AuthModule,
     UsersModule,
     PassportModule.register({ session: true }),
   ],
   controllers: [],
-  // providers: [PrismaService],
   providers: [PrismaService, { provide: 'APP_GUARD', useClass: SessionGuard }],
 })
 export class AppModule {}

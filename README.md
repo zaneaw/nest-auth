@@ -1,5 +1,5 @@
 # TODO:
-* Develop this for mobile
+* Sign in with either username or email
 * Federated logins from social providers
 
 <p align="center">
